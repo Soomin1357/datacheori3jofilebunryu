@@ -10,3 +10,5 @@ pillow
 kiwipiepy
 sentence-transformers
 torch
+nltk
+xlrd
