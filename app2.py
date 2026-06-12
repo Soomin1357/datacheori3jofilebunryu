@@ -15,18 +15,7 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 
 import numpy as np
-
-# ========================================================
-# 🔥 [치트키] 서버가 라이브러리를 못 찾으면 스스로 강제 설치하는 로직
-# ========================================================
-try:
-    import fitz
-except ImportError:
-    # 서버 환경에서 PyMuPDF가 없으면 코드가 직접 pip install을 실행합니다.
-    subprocess.run([sys.executable, '-m', 'pip', 'install', 'PyMuPDF'], check=True)
-    import fitz
-# ========================================================
-
+import fitz  # 💡 Python 3.11 가상머신이 requirements.txt를 읽어 정상 설치하게 됩니다.
 import olefile
 import docx
 import pptx
