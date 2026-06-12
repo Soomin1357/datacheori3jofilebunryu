@@ -1,4 +1,12 @@
 streamlit
 pandas
 numpy
+PyMuPDF==1.24.1
+olefile
+docx
+pptx
 openpyxl
+pillow
+kiwipiepy
+sentence-transformers
+torch
