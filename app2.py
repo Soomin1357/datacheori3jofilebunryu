@@ -15,7 +15,7 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 
 import numpy as np
-import fitz  # PyMuPDF 라이브러리로 구동됨
+import fitz  # 💡 Python 3.11 가상머신이 requirements.txt를 읽어 정상 로드합니다.
 import olefile
 import docx
 import pptx
@@ -30,7 +30,7 @@ import pandas as pd
 # NLTK 및 구형 엑셀 전용 라이브러리(xlrd) 패키지 다운로드
 @st.cache_resource
 def load_nltk_and_words():
-    subprocess.run([sys.executable, '-m', 'pip', 'install', 'nltk', 'xlrd', '-q'], check=True)
+    # 🌟 에러를 내던 내부 subprocess.run([pip install]) 코드를 완벽히 제거했습니다.
     import nltk
     nltk.download('words', quiet=True)
     from nltk.corpus import words as en_words
