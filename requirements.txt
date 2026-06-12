@@ -1,12 +1,4 @@
 streamlit
 pandas
 numpy
-PyMuPDF
-olefile
-docx
-pptx
 openpyxl
-pillow
-kiwipiepy
-sentence-transformers
-torch
