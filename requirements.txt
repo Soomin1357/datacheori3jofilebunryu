@@ -4,7 +4,7 @@ numpy
 PyMuPDF==1.24.1
 olefile
 docx
-pptx
+python-pptx
 openpyxl
 pillow
 kiwipiepy
