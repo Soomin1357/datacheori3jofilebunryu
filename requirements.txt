@@ -3,7 +3,7 @@ pandas
 numpy
 PyMuPDF==1.24.1
 olefile
-docx
+python-docx
 python-pptx
 openpyxl
 pillow
