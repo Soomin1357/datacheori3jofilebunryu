@@ -14,8 +14,31 @@ import shutil
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 
+# ========================================================
+# 🔥 [핵심 조치] 외부 서버 패키지 미인식 버그 강제 돌파 로직
+# ========================================================
+def emergency_pip_install():
+    # 1. PDF 리더용 PyMuPDF 강제 체크 및 설치
+    try:
+        import fitz
+    except ImportError:
+        subprocess.run([sys.executable, '-m', 'pip', 'install', '--disable-pip-version-check', 'PyMuPDF'], check=True)
+        import fitz
+        
+    # 2. 구형 엑셀 전용 xlrd 강제 체크 및 설치
+    try:
+        import xlrd
+    except ImportError:
+        subprocess.run([sys.executable, '-m', 'pip', 'install', '--disable-pip-version-check', 'xlrd'], check=True)
+        import xlrd
+
+# 프로그램 로드 시 최상단에서 패키지 무조건 강제 주입
+emergency_pip_install()
+import fitz
+import xlrd
+# ========================================================
+
 import numpy as np
-import fitz  # 💡 Python 3.11 가상머신이 requirements.txt를 읽어 정상 설치하게 됩니다.
 import olefile
 import docx
 import pptx
@@ -27,10 +50,10 @@ import streamlit as st
 import pandas as pd
 
 
-# NLTK 및 구형 엑셀 전용 라이브러리(xlrd) 패키지 다운로드
+# NLTK 코퍼스 패키지 안전 다운로드
 @st.cache_resource
 def load_nltk_and_words():
-    subprocess.run([sys.executable, '-m', 'pip', 'install', 'nltk', 'xlrd', '-q'], check=True)
+    subprocess.run([sys.executable, '-m', 'pip', 'install', 'nltk', '-q'], check=True)
     import nltk
     nltk.download('words', quiet=True)
     from nltk.corpus import words as en_words
@@ -38,7 +61,6 @@ def load_nltk_and_words():
 
 
 EN_WORDS = load_nltk_and_words()
-import xlrd  # 설치 완료 후 임포트
 
 ABBREV_KEEP = {
     'ai', 'ml', 'dl', 'ocr', 'api', 'url', 'pdf', 'ppt', 'hwp', 'hwpx',
