@@ -15,7 +15,7 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 
 import numpy as np
-import fitz
+import fitz  # PyMuPDF 라이브러리로 구동됨
 import olefile
 import docx
 import pptx
@@ -47,12 +47,12 @@ ABBREV_KEEP = {
     'saas', 'erp', 'crm', 'ceo', 'cto', 'cfo', 'ver', 'no', 'vs', 'idx',
 }
 
-# 💡 [외부 배포용 수정]: 윈도우 절대 경로 하드코딩을 제거하고 환경에 맞게 유연하게 분기 처리합니다.
+# 로컬 PC와 외부 리눅스 서버 환경 자동 감지 및 분기
 HAS_OCR = False
 try:
     import pytesseract
-
-    # 1. 로컬 아나콘다 환경인 경우 (윈도우 절대 경로 안전장치)
+    
+    # 1. 로컬 PC 환경인 경우
     _MYENV_BIN = r"C:\Users\maser\anaconda3\envs\myenv\Library\bin"
     if os.path.exists(_MYENV_BIN):
         _BASE_BIN = r"C:\Users\maser\anaconda3\Library\bin"
@@ -64,8 +64,6 @@ try:
         HAS_OCR = True
     else:
         # 2. 외부 리눅스 서버(Streamlit Cloud) 환경인 경우
-        # 리눅스는 패키지 설치 시 tesseract 명령어 시스템 경로에 자동으로 잡힙니다.
-        # 기본 언어 데이터 경로도 리눅스 표준 경로로 지정해줍니다.
         if shutil.which("tesseract"):
             pytesseract.pytesseract.tesseract_cmd = "tesseract"
             if os.path.exists("/usr/share/tesseract-ocr/4.00/tessdata"):
@@ -621,7 +619,7 @@ if uploaded_files:
                                 if top1_score >= 5:
                                     best_category = top1_cat
 
-                        # [Step 3] 임베딩 유사도 매칭
+                        # [Step 3] 임베딩 유사도 매칭 (임계값 0.5 반영)
                         if not best_category:
                             text_ready = prepare_text_for_embedding(extracted_text if extracted_text else clean_name)
                             vec = SBERT_MODEL.encode(text_ready, show_progress_bar=False)
@@ -656,7 +654,7 @@ if uploaded_files:
     # ==========================================
     else:
         if st.session_state.classified_df is not None and not st.session_state.classified_df.empty:
-
+            
             st.subheader("📊 일괄 자동 분류 완료 현황 (미리보기 및 수정)")
             st.caption("💡 AI가 분류한 결과가 모호하다면 아래 표에서 직접 카테고리를 수동 변경할 수 있습니다.")
 
@@ -687,8 +685,7 @@ if uploaded_files:
             st.subheader("📝 다운로드 폴더별 한 줄 설명 커스텀 설정")
             st.caption("💡 압축 파일 내부 폴더명 뒤 괄호안에 들어갈 설명을 설정합니다. 원하는 문구로 자유롭게 편집해 보세요!")
 
-            desc_data = [{"카테고리 폴더": cat, "폴더 한 줄 설명": desc.split("입니다.")[0]} for cat, desc in
-                         ANCHOR_DESCRIPTIONS.items()]
+            desc_data = [{"카테고리 폴더": cat, "폴더 한 줄 설명": desc.split("입니다.")[0]} for cat, desc in ANCHOR_DESCRIPTIONS.items()]
             desc_data.append({"카테고리 폴더": "9. 기타", "폴더 한 줄 설명": "분류 규칙에 미치지 못하는 문서"})
             desc_df = pd.DataFrame(desc_data)
 
@@ -707,7 +704,7 @@ if uploaded_files:
 
             st.divider()
 
-            # 3. 최종 패킹 다운로드 구역
+            # 3. 최종 패킹 다운로드 구역 (무결성 파일 구조 방식)
             st.markdown("### 📥 대용량 분류 완료 패키지 다운로드")
 
             col_btn1, col_btn2 = st.columns([1, 1])
@@ -715,10 +712,10 @@ if uploaded_files:
             with col_btn1:
                 if st.button("📦 최종 설정 반영하여 ZIP 파일 생성하기", use_container_width=True, type="secondary"):
                     with st.spinner("지정한 폴더 계층 구조와 커스텀 설명에 맞추어 ZIP 구조 빌드 중..."):
-
+                        
                         with tempfile.TemporaryDirectory() as packing_dir:
                             readme_lines = ["=== 다운로드 문서 분류 구성 안내 가이드 ===\n"]
-                            cat_to_eng = {cat: f"Folder_{i + 1}" for i, cat in enumerate(CATEGORIES_LIST[:-1])}
+                            cat_to_eng = {cat: f"Folder_{i+1}" for i, cat in enumerate(CATEGORIES_LIST[:-1])}
                             cat_to_eng["9. 기타"] = "Folder_9"
 
                             for _, row in st.session_state.classified_df.iterrows():
@@ -744,10 +741,10 @@ if uploaded_files:
 
                             archive_base_path = os.path.join(tempfile.gettempdir(), f"archive_{int(time.time())}")
                             shutil.make_archive(archive_base_path, 'zip', packing_dir)
-
+                            
                             with open(archive_base_path + ".zip", "rb") as zf:
                                 st.session_state.zip_buffer = zf.read()
-
+                            
                             if os.path.exists(archive_base_path + ".zip"):
                                 os.remove(archive_base_path + ".zip")
 
