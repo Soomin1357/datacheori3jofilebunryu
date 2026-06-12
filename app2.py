@@ -15,7 +15,7 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 
 import numpy as np
-import fitz  # 💡 Python 3.11 가상머신이 requirements.txt를 읽어 정상 로드합니다.
+import fitz  # PyMuPDF 라이브러리로 구동됨
 import olefile
 import docx
 import pptx
