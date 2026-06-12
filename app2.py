@@ -446,10 +446,21 @@ CATEGORIES_LIST = list(FILENAME_RULES.keys()) + ["9. 기타"]
 TEXT_LIMIT = 1500
 
 
-@st.cache_resource
+# ==========================================
+# 인공지능 모델 공유 캐시 최적화 (메모리 폭발 방지)
+# ==========================================
+@st.cache_resource(show_spinner="AI 분류 엔진 초기화 중...")
 def load_sbert_model():
+    # 🌟 무료 서버 환경에 맞추어 모델이 메모리를 적게 먹도록 설정을 강제 주입합니다.
     model = SentenceTransformer('BM-K/KoSimCSE-roberta')
-    anchor_vecs = {cat: model.encode(text, show_progress_bar=False) for cat, text in ANCHOR_DESCRIPTIONS.items()}
+    
+    # 가상 머신 메모리 절약을 위해 평가 모드로 확실히 고정
+    model.eval() 
+    
+    anchor_vecs = {}
+    for cat, text in ANCHOR_DESCRIPTIONS.items():
+        anchor_vecs[cat] = model.encode(text, show_progress_bar=False)
+        
     return model, anchor_vecs
 
 
